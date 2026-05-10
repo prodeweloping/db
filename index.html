@@ -1,661 +1,1165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="Pro.png">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Daily Routine</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Daily Book | Pro developing</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
 
-        :root {
-            --primary: #3498db;
-            --primary-dark: #2980b9;
-            --success: #2ecc71;
-            --warning: #f39c12;
-            --danger: #e74c3c;
-            --dark: #1e2a38;
-            --darker: #0f2027;
-            --light: #ecf0f1;
-            --glass: rgba(255, 255, 255, 0.1);
-            --shadow: rgba(0, 0, 0, 0.2);
-        }
+    body {
+      background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+      padding: 20px 16px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-        body {
-            background: linear-gradient(135deg, var(--darker), #203a43, #2c5364);
-            color: var(--light);
-            min-height: 100vh;
-            padding: 20px 15px;
-            overflow-x: hidden;
-            perspective: 1000px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    .container {
+      max-width: 750px;
+      margin: 0 auto;
+      width: 100%;
+    }
 
-        .container {
-            width: 100%;
-            max-width: 500px;
-        }
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-weight: 500;
+      z-index: 1000;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
+      display: none;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      text-align: center;
+      max-width: 90%;
+    }
+    .toast.show { display: flex; animation: slideDown 0.3s ease; }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateX(-50%) translateY(-30px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
 
-        .title-3d {
-            text-align: center;
-            margin-bottom: 30px;
-            text-transform: uppercase;
-            font-weight: 900;
-            letter-spacing: 2px;
-            text-shadow: 
-                0 1px 0 #ccc, 
-                0 2px 0 #c9c9c9,
-                0 3px 0 #bbb,
-                0 4px 0 #b9b9b9,
-                0 5px 0 #aaa,
-                0 6px 1px rgba(0,0,0,.1),
-                0 0 5px rgba(0,0,0,.1),
-                0 1px 3px rgba(0,0,0,.3),
-                0 3px 5px rgba(0,0,0,.2),
-                0 5px 10px rgba(0,0,0,.25),
-                0 10px 10px rgba(0,0,0,.2),
-                0 20px 20px rgba(0,0,0,.15);
-            color: white;
-            font-size: 2.5rem;
-        }
+    /* Loading Overlay */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+ backdrop-filter: blur(4px);
+      z-index: 3000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .loading-overlay.show {
+      display: flex;
+    }
+    .loader {
+      width: 60px;
+      height: 60px;
+      border: 5px solid #e2e8f0;
+      border-top: 5px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .loading-text {
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      background: rgba(0,0,0,0.7);
+      padding: 8px 20px;
+      border-radius: 40px;
+      letter-spacing: 1px;
+    }
 
-        .card-3d {
-            width: 100%;
-            margin: 0 auto 25px;
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            padding: 25px;
-            border-radius: 25px;
-            box-shadow: 
-                0 10px 30px var(--shadow),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2),
-                0 20px 40px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transform-style: preserve-3d;
-            transition: transform 0.5s ease, box-shadow 0.5s ease;
-            position: relative;
-            overflow: hidden;
-        }
+    /* Button Loading State */
+    .btn-loading {
+      position: relative;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    .btn-loading::after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      border: 2px solid white;
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
 
-        .card-3d:hover {
-            transform: translateY(-5px) rotateX(5deg);
-            box-shadow: 
-                0 15px 35px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2),
-                0 25px 50px rgba(0, 0, 0, 0.4);
-        }
+    .card {
+      background: rgba(255,255,255,0.97);
+      border-radius: 2rem;
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 20px 35px -12px rgba(0,0,0,0.12);
+      border: 1px solid rgba(255,255,255,0.6);
+    }
 
-        .card-3d::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transform: rotate(45deg);
-            transition: 0.5s;
-            z-index: 1;
-        }
+    h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #0f172a, #2d3a5e);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-bottom: 1.2rem;
+      letter-spacing: 0.5px;
+    }
 
-        .card-3d:hover::before {
-            left: 100%;
-        }
+    .input-field {
+      width: 100%;
+      padding: 14px 18px;
+      margin-bottom: 14px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 1.5rem;
+      font-size: 1rem;
+      background: #ffffff;
+      transition: 0.2s;
+      outline: none;
+    }
+    .input-field:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+    }
 
-        .card-content {
-            position: relative;
-            z-index: 2;
-        }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 2rem;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .btn-primary { background: #0f172a; color: white; }
+    .btn-primary:hover { background: #1e293b; transform: translateY(-2px); }
+    .btn-secondary { background: #3b82f6; color: white; }
+    .btn-secondary:hover { background: #2563eb; }
+    .btn-success { background: #15803d; color: white; }
+    .btn-success:hover { background: #166534; }
+    .btn-danger { background: #dc2626; color: white; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-outline {
+      background: transparent;
+      border: 2px solid #3b82f6;
+      color: #3b82f6;
+    }
+    .btn-outline:hover {
+      background: #3b82f6;
+      color: white;
+    }
 
-        h2 {
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 1.8rem;
-            color: white;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 1.5rem;
+    }
+    .logout-btn {
+      width: auto;
+      padding: 8px 20px;
+      background: #ef4444;
+      border-radius: 40px;
+      font-size: 0.85rem;
+    }
 
-        /* step indicator */
-        .step-indicator {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 25px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 50px;
-            padding: 8px 5px;
-        }
-        .step {
-            padding: 8px 20px;
-            border-radius: 30px;
-            font-weight: bold;
-            color: white;
-            background: rgba(255,255,255,0.1);
-            transition: all 0.3s;
-            cursor: pointer;
-            font-size: 1rem;
-            border: none;
-            width: 45%;
-        }
-        .step.active {
-            background: var(--primary);
-            box-shadow: 0 4px 10px rgba(52,152,219,0.5);
-        }
+    .tab-buttons {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: #e2e8f0;
+      color: #334155;
+      transition: 0.2s;
+    }
+    .tab-btn.active {
+      background: #0f172a;
+      color: white;
+    }
 
-        /* bank/task items */
-        .bank-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            transition: all 0.3s;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
+    .auth-nav {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .auth-nav-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: #e2e8f0;
+      color: #334155;
+      transition: 0.2s;
+    }
+    .auth-nav-btn.active {
+      background: #0f172a;
+      color: white;
+    }
 
-        .bank-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
+    .user-card {
+      background: white;
+      border-radius: 1.2rem;
+      margin-bottom: 14px;
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .user-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 18px;
+      background: #ffffff;
+      cursor: pointer;
+      transition: 0.1s;
+    }
+    .user-header:hover {
+      background: #f8fafc;
+    }
+    .user-name {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: #0f172a;
+    }
+    .user-balance {
+      font-weight: 800;
+      padding: 5px 14px;
+      border-radius: 40px;
+      font-size: 0.9rem;
+    }
+    .positive { background: #dcfce7; color: #15803d; }
+    .negative { background: #fee2e2; color: #b91c1c; }
+    .neutral { background: #e2e8f0; color: #475569; }
 
-        .bank-name {
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: white;
-            flex: 1;
-        }
+    .delete-user-icon {
+      background: #fee2e2;
+      color: #dc2626;
+      padding: 6px 12px;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-left: 8px;
+    }
+    .delete-user-icon:hover {
+      background: #dc2626;
+      color: white;
+    }
 
-        .bank-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
+    .txn-panel {
+      padding: 18px;
+      background: #fefce8;
+      border-top: 2px solid #e2e8f0;
+      display: none;
+    }
+    .txn-panel.open {
+      display: block;
+    }
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #334155;
+    }
+    .small-input, .purpose-input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 40px;
+      border: 1.5px solid #cbd5e1;
+      font-size: 0.9rem;
+    }
+    .flex-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .flex-row .btn {
+      margin-bottom: 0;
+      flex: 1;
+      padding: 10px;
+    }
+    .result-message {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 1rem;
+      text-align: center;
+      font-weight: 500;
+      display: none;
+    }
+    .history-list {
+      margin-top: 15px;
+      max-height: 350px;
+      overflow-y: auto;
+    }
+    .history-item {
+      padding: 12px 0;
+      border-bottom: 1px solid #e2e8f0;
+      position: relative;
+    }
+    .history-date {
+      font-size: 0.7rem;
+      color: #6c7a8e;
+      margin-bottom: 4px;
+    }
+    .history-detail {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .history-purpose {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #1e293b;
+      flex: 2;
+    }
+    .history-amount {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .credit-amount { color: #15803d; }
+    .debit-amount { color: #b91c1c; }
+    .running-balance {
+      font-size: 0.7rem;
+      color: #475569;
+      margin-top: 4px;
+    }
+    .txn-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      justify-content: flex-end;
+    }
+    .edit-txn, .delete-txn {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 30px;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .edit-txn {
+      color: #3b82f6;
+    }
+    .edit-txn:hover {
+      background: #dbeafe;
+    }
+    .delete-txn {
+      color: #dc2626;
+    }
+    .delete-txn:hover {
+      background: #fee2e2;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: #64748b;
+      background: #f8fafc;
+      border-radius: 1rem;
+    }
 
-        .btn-3d {
-            padding: 14px 20px;
-            border: none;
-            border-radius: 15px;
-            margin: 10px 5px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1rem;
-            width: 100%;
-            display: block;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.2s ease;
-            transform-style: preserve-3d;
-            position: relative;
-            box-shadow: 0 5px 0 rgba(0, 0, 0, 0.2), 0 8px 10px rgba(0, 0, 0, 0.2);
-            outline: none;
-        }
+    .footer {
+      text-align: center;
+      padding: 20px 16px;
+      margin-top: 20px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 2rem;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+    .footer .website {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #0f172a;
+      letter-spacing: 0.5px;
+    }
+    .footer .website a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+    .footer .brand {
+      font-size: 0.85rem;
+      color: #475569;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .footer .brand span {
+      background: linear-gradient(135deg, #0f172a, #2d3a5e);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      font-weight: 700;
+    }
 
-        .btn-3d:active {
-            transform: translateY(5px);
-            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
-        }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-card {
+      background: white;
+      border-radius: 2rem;
+      padding: 2rem;
+      max-width: 400px;
+      width: 90%;
+    }
+    .modal-card h3 {
+      margin-bottom: 1rem;
+      color: #0f172a;
+    }
+    .modal-card input, .modal-card select {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 2px solid #e2e8f0;
+      border-radius: 1rem;
+      font-size: 1rem;
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .modal-buttons button {
+      flex: 1;
+      margin: 0;
+    }
 
-        .btn-blue { background: linear-gradient(to bottom, var(--primary), var(--primary-dark)); color: white; }
-        .btn-green { background: linear-gradient(to bottom, var(--success), #27ae60); color: white; }
-        .btn-orange { background: linear-gradient(to bottom, var(--warning), #e67e22); color: white; }
-        .btn-red { background: linear-gradient(to bottom, var(--danger), #c0392b); color: white; }
+    .forgot-link { text-align: right; margin-top: -8px; margin-bottom: 12px; }
+    .forgot-link a { color: #3b82f6; font-size: 0.8rem; cursor: pointer; }
 
-        .input-3d {
-            width: 100%;
-            padding: 15px;
-            border-radius: 15px;
-            border: none;
-            font-size: 1rem;
-            text-align: center;
-            margin: 10px 0;
-            background: rgba(255, 255, 255, 0.9);
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1), 0 3px 5px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
-            color: #333;
-        }
-        .input-3d:focus {
-            outline: none;
-            background: white;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1), 0 0 0 3px rgba(52,152,219,0.3);
-        }
-
-        .total-3d {
-            background: linear-gradient(135deg, #00bcd4, #0097a7);
-            padding: 18px;
-            border-radius: 15px;
-            margin: 20px 0;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: white;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,188,212,0.4), inset 0 1px 0 rgba(255,255,255,0.3);
-            text-shadow: 0 2px 3px rgba(0,0,0,0.3);
-        }
-
-        .action-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .back-btn {
-            display: block;
-            margin: 25px auto 0;
-            padding: 12px 25px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            width: 150px;
-            text-align: center;
-        }
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-3px);
-        }
-
-        .hidden { display: none !important; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in { animation: fadeIn 0.5s ease forwards; }
-
-        .task-cat-btn {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            font-weight: bold;
-        }
-
-        @media (max-width: 480px) {
-            .title-3d { font-size: 2rem; }
-            .card-3d { padding: 20px 15px; }
-            .btn-3d { padding: 12px 16px; font-size: 0.9rem; }
-            .action-buttons { grid-template-columns: 1fr; }
-        }
-    </style>
+    @media (max-width: 500px) {
+      .card { padding: 1.3rem; }
+      .flex-row { flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- MAIN MENU -->
-        <div class="card-3d fade-in" id="mainMenu">
-            <div class="card-content">
-                <h1 class="title-3d">Daily Routine</h1>
-                <button class="btn-3d btn-blue" onclick="show('cash')">
-                    <i class="fas fa-wallet"></i> Cash Counter
-                </button>
-                <button class="btn-3d btn-blue" onclick="show('task')">
-                    <i class="fas fa-tasks"></i> Daily Task
-                </button>
-            </div>
-        </div>
+<div class="container">
+  <div id="toastMsg" class="toast"></div>
+  
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loader"></div>
+    <div class="loading-text">Processing... Daily Book</div>
+  </div>
 
-        <!-- CASH COUNTER (Step1 = view entries, Step2 = add entry) -->
-        <div class="card-3d hidden" id="cash">
-            <div class="card-content">
-                <h2><i class="fas fa-money-bill-wave"></i> Cash Counter</h2>
-                
-                <!-- step 1 & step 2 tabs -->
-                <div class="step-indicator">
-                  <button class="step" id="cashStep1Btn" onclick="switchCashStep(1)">Cash</button>
-                    <button class="step" id="cashStep2Btn" onclick="switchCashStep(2)">add</button>
-                </div>
+  <!-- Edit Transaction Modal -->
+  <div id="editModal" class="modal-overlay">
+    <div class="modal-card">
+      <h3>✏️ Edit Transaction</h3>
+      <input type="number" id="editAmount" placeholder="Amount (₹)" step="1">
+      <input type="text" id="editPurpose" placeholder="Purpose / Reason">
+      <select id="editType">
+        <option value="credit">Credit (+)</option>
+        <option value="debit">Debit (-)</option>
+      </select>
+      <div class="modal-buttons">
+        <button id="saveEditBtn" class="btn btn-primary">Save Changes</button>
+        <button id="cancelEditBtn" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
 
-                <!-- Step 1: show all entries (view/edit) -->
-                <div id="cashStep1Panel">
-                    <div id="boxes"></div>
-                    <div class="total-3d">Total: ₹ <span id="total">0</span></div>
-                    <div class="action-buttons">
-                        <button class="btn-3d btn-orange" onclick="deleteBox()"><i class="fas fa-trash-alt"></i> Delete Bank</button>
-                        <button class="btn-3d btn-red" onclick="resetAll()"><i class="fas fa-redo"></i> Reset All</button>
-                    </div>
-                </div>
+  <!-- Delete User Modal -->
+  <div id="deleteUserModal" class="modal-overlay">
+    <div class="modal-card">
+      <h3>⚠️ Delete User</h3>
+      <p>Enter security code (4X8X):</p>
+      <input type="password" id="deleteCodeInput" placeholder="Code">
+      <div class="modal-buttons">
+        <button id="confirmDeleteUserBtn" class="btn btn-danger">Delete User</button>
+        <button id="cancelDeleteUserBtn" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
 
-                <!-- Step 2: add new bank entry (simple form) -->
-                <div id="cashStep2Panel" class="hidden">
-                    <div style="text-align: center; padding: 15px 0;">
-                        <i class="fas fa-piggy-bank" style="font-size: 3rem; color: #ffd966;"></i>
-                        <h3 style="margin: 15px 0;">Add New Bank</h3>
-                        <input type="text" id="newBankName" class="input-3d" placeholder="e.g. Credit Union" autocomplete="off">
-                        <button class="btn-3d btn-green" onclick="addBoxFromStep2()" style="margin-top: 15px;">
-                            <i class="fas fa-save"></i> Save Bank
-                        </button>
-                        <p style="margin-top: 15px; font-size: 0.9rem; opacity:0.7;">Bank will appear with ₹0 balance</p>
-                    </div>
-                </div>
+  <!-- Forgot Password Modal -->
+  <div id="forgotModal" class="modal-overlay">
+    <div class="modal-card">
+      <h3>🔁 Reset Password</h3>
+      <input type="email" id="resetEmailModal" placeholder="Your email address">
+      <div class="modal-buttons">
+        <button id="sendResetModalBtn" class="btn btn-primary">Send Reset Link</button>
+        <button id="cancelForgotBtn" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
 
-                <button class="back-btn" onclick="back()"><i class="fas fa-arrow-left"></i> Back</button>
-            </div>
-        </div>
-
-        <!-- DAILY TASK (Step1 = entries list, Step2 = add task) -->
-        <div class="card-3d hidden" id="task">
-            <div class="card-content">
-                <h2><i class="fas fa-calendar-day"></i> Daily Task</h2>
-
-                <!-- category buttons (ITI / Home / Pro Dev) -->
-                <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
-                    <button class="btn-3d task-cat-btn" style="width: auto; padding: 10px 18px; margin:0;" onclick="openTaskCategory('iti')">🏭 ITI</button>
-                    <button class="btn-3d task-cat-btn" style="width: auto; padding: 10px 18px; margin:0;" onclick="openTaskCategory('home')">🏠 Home</button>
-                    <button class="btn-3d task-cat-btn" style="width: auto; padding: 10px 18px; margin:0;" onclick="openTaskCategory('pro')">💼 Pro Dev</button>
-                </div>
-
-                <!-- step tabs inside task -->
-                <div class="step-indicator">
-                    <button class="step" id="taskStep1Btn" onclick="switchTaskStep(1)">Task</button>
-                    <button class="step" id="taskStep2Btn" onclick="switchTaskStep(2)">add</button>
-                </div>
-
-                <!-- Step 1: show tasks of selected category -->
-                <div id="taskStep1Panel">
-                    <h3 id="currentCategoryTitle" style="margin:10px 0; color:#ffb570;">ITI Tasks</h3>
-                    <div id="taskList" style="min-height: 120px;"></div>
-                </div>
-
-                <!-- Step 2: add new task form -->
-                <div id="taskStep2Panel" class="hidden">
-                    <div style="padding: 10px;">
-                        <label style="font-weight: bold;">New task for <span id="taskCategoryLabel">ITI</span></label>
-                        <input id="taskInput" class="input-3d" placeholder="write task ...">
-                        <button class="btn-3d btn-green" onclick="addCurrentTask()"><i class="fas fa-plus"></i> Add Task</button>
-                    </div>
-                </div>
-
-                <button class="back-btn" onclick="back()"><i class="fas fa-arrow-left"></i> Back</button>
-            </div>
-        </div>
+  <!-- AUTH SECTION -->
+  <div id="authSection">
+    <!-- Login Page -->
+    <div id="loginPage" class="card">
+      <h2>🔐 Daily Book Tools</h2>
+      <div class="subtitle">Digital Book Management System</div>
+      <div class="auth-nav">
+        <button class="auth-nav-btn active" id="gotoLoginBtn">Login</button>
+        <button class="auth-nav-btn" id="gotoRegisterPageBtn">Create Account</button>
+      </div>
+      <input type="email" id="loginEmail" class="input-field" placeholder="Email address">
+      <input type="password" id="loginPassword" class="input-field" placeholder="Password">
+      <div class="forgot-link"><a id="forgotPasswordLink">Forgot password?</a></div>
+      <button id="doLoginBtn" class="btn btn-primary">Sign In</button>
     </div>
 
-    <script>
-        // ---------- GLOBAL ----------
-        function show(id) {
-            document.getElementById('mainMenu').classList.add('hidden');
-            document.getElementById('cash').classList.add('hidden');
-            document.getElementById('task').classList.add('hidden');
-            const page = document.getElementById(id);
-            page.classList.remove('hidden');
-            page.classList.add('fade-in');
+    <!-- Register Page -->
+    <div id="registerPage" class="card" style="display:none;">
+      <h2>📝 Create Account</h2>
+      <div class="subtitle">Join Daily Book Services</div>
+      <div class="auth-nav">
+        <button class="auth-nav-btn" id="gotoLoginFromRegisterBtn">Login</button>
+        <button class="auth-nav-btn active" id="gotoRegisterBtn">Create Account</button>
+      </div>
+      <input type="email" id="regEmail" class="input-field" placeholder="Email address">
+      <input type="password" id="regPassword" class="input-field" placeholder="Password (min 6 characters)">
+      <input type="password" id="regConfirmPassword" class="input-field" placeholder="Confirm Password">
+      <button id="doRegisterBtn" class="btn btn-secondary">Register Now</button>
+      <p style="text-align: center; margin-top: 12px; font-size: 0.75rem; color: #64748b;">Already have an account? <a id="switchToLoginFromReg" style="color:#3b82f6; cursor:pointer;">Login here</a></p>
+    </div>
+  </div>
 
-            if (id === 'cash') {
-                // default step 1 for cash
-                switchCashStep(1);
-                renderCash();
-            } else if (id === 'task') {
-                // default ITI, step1
-                currentTaskCategory = 'iti';
-                openTaskCategory('iti');
-                switchTaskStep(1);
-            }
-        }
+  <!-- MAIN APP -->
+  <div id="appSection" style="display:none;">
+    <div class="card">
+      <div class="top-bar">
+        <div>
+          <h2>📒 Daily Book</h2>
+          <div class="subtitle">Pro Developing Edition</div>
+        </div>
+        <button id="logoutMainBtn" class="logout-btn btn-danger" style="width:auto;">Logout</button>
+      </div>
 
-        function back() {
-            document.getElementById('cash').classList.add('hidden');
-            document.getElementById('task').classList.add('hidden');
-            document.getElementById('mainMenu').classList.remove('hidden');
-            document.getElementById('mainMenu').classList.add('fade-in');
-        }
+      <div class="tab-buttons">
+        <button class="tab-btn active" id="tabUsersBtn">👥 Users List</button>
+        <button class="tab-btn" id="tabAddUserBtn">➕ Add User</button>
+      </div>
 
-        // ---------- CASH COUNTER ----------
-        let cashData = JSON.parse(localStorage.getItem("bankData")) || [
-            {name:"Bank Account", amount:0},
-            {name:"UPI Wallet", amount:0},
-            {name:"Cash", amount:0},
-            {name:"Savings", amount:0}
-        ];
+      <div id="usersListSection">
+        <div style="font-weight: 500; margin-bottom: 12px; color: #475569;">👇 Click on user </div>
+        <div id="usersContainer"></div>
+      </div>
 
-        function saveCash() {
-            localStorage.setItem("bankData", JSON.stringify(cashData));
-        }
+      <div id="addUserSection" style="display: none;">
+        <input type="text" id="newUserName" class="input-field" placeholder="Enter user name">
+        <button id="confirmAddUserBtn" class="btn btn-primary">➕ Add New User</button>
+      </div>
+    </div>
+  </div>
 
-        function renderCash() {
-            let container = document.getElementById("boxes");
-            if (!container) return;
-            container.innerHTML = "";
-            let total = 0;
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="website">
+      🌐 <a href="https://www.prodeveloping.online" target="_blank">www.prodeveloping.online</a>
+    </div>
+    <div class="brand">
+      <span>⚡ Pro Tools</span> | Pro Developing Services
+    </div>
+  </div>
+</div>
 
-            cashData.forEach((item, index) => {
-                total += Number(item.amount);
-                container.innerHTML += `
-                    <div class="bank-item">
-                        <div class="bank-name">${item.name}</div>
-                        <div class="bank-actions">
-                            <input class="input-3d" type="number" value="${item.amount}" 
-                                   oninput="updateCash(${index}, this.value)" 
-                                   placeholder="₹" style="width: 110px; padding: 10px; margin: 0;">
-                            <button onclick="editBox(${index})" style="background: #3498db; color: white; border: none; border-radius: 8px; padding: 10px 15px; cursor: pointer;">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </div>
-                    </div>`;
-            });
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+  import { getDatabase, ref, push, onValue, get, update, remove } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
 
-            document.getElementById("total").innerText = total;
-            saveCash();
-        }
+  const firebaseConfig = {
+    apiKey: "AIzaSyAZB3Aigb7bkOMrA5sWK9L4wGzTvL43XY0",
+    authDomain: "legender-app.firebaseapp.com",
+    databaseURL: "https://legender-app-default-rtdb.firebaseio.com",
+    projectId: "legender-app",
+    storageBucket: "legender-app.firebasestorage.app",
+    messagingSenderId: "257858496013",
+    appId: "1:257858496013:web:e19ec2f08e83fd869c9744"
+  };
 
-        function updateCash(i, val) {
-            cashData[i].amount = val ? Number(val) : 0;
-            let total = 0;
-            cashData.forEach(item => total += Number(item.amount));
-            document.getElementById("total").innerText = total;
-            saveCash();
-        }
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
 
-        function addBox() {  // from step1 delete/reset section, but we also have step2
-            let name = prompt("Enter New Bank Name:");
-            if (!name || name.trim() === "") return;
-            cashData.push({name: name.trim(), amount: 0});
-            renderCash();
-        }
+  const toast = document.getElementById("toastMsg");
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  const authSection = document.getElementById("authSection");
+  const appSection = document.getElementById("appSection");
+  const loginPage = document.getElementById("loginPage");
+  const registerPage = document.getElementById("registerPage");
+  const forgotModal = document.getElementById("forgotModal");
+  const usersContainer = document.getElementById("usersContainer");
+  const usersListSection = document.getElementById("usersListSection");
+  const addUserSection = document.getElementById("addUserSection");
+  const tabUsersBtn = document.getElementById("tabUsersBtn");
+  const tabAddUserBtn = document.getElementById("tabAddUserBtn");
 
-        // dedicated step2 add
-        function addBoxFromStep2() {
-            let nameInput = document.getElementById("newBankName");
-            let name = nameInput.value.trim();
-            if (name === "") {
-                alert("Please enter a bank name");
-                return;
-            }
-            cashData.push({name: name, amount: 0});
-            nameInput.value = "";
-            renderCash();           // update step1 list
-            switchCashStep(1);      // go back to step1 to see new entry
-        }
+  // Loading functions
+  function showLoading() {
+    loadingOverlay.classList.add("show");
+  }
+  function hideLoading() {
+    loadingOverlay.classList.remove("show");
+  }
 
-        function editBox(index) {
-            let newName = prompt("Edit Bank Name", cashData[index].name);
-            if (newName && newName.trim() !== "") {
-                cashData[index].name = newName.trim();
-                renderCash();
-            }
-        }
+  function showToast(msg, isError = false) {
+    toast.textContent = msg;
+    toast.style.background = isError ? "#dc2626" : "#0f172a";
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2800);
+  }
 
-        function deleteBox() {
-            if (cashData.length === 0) { alert("No banks!"); return; }
-            let list = "Select bank to delete:\n";
-            cashData.forEach((item,i) => list += `${i+1}. ${item.name}\n`);
-            let choice = prompt(list + "\nEnter number or name:");
-            if (!choice) return;
-            let index = parseInt(choice) - 1;
-            if (!isNaN(index) && index >=0 && index < cashData.length) {
-                if (confirm(`Delete ${cashData[index].name}?`)) {
-                    cashData.splice(index,1);
-                    renderCash();
-                }
-            } else {
-                cashData = cashData.filter(item => item.name.toLowerCase() !== choice.toLowerCase().trim());
-                renderCash();
-            }
-        }
+  // Edit modal variables
+  const editModal = document.getElementById("editModal");
+  const editAmount = document.getElementById("editAmount");
+  const editPurpose = document.getElementById("editPurpose");
+  const editType = document.getElementById("editType");
+  let editTarget = { userId: null, transactionId: null };
 
-        function resetAll() {
-            if (confirm("Set all amounts to zero?")) {
-                cashData.forEach(item => item.amount = 0);
-                renderCash();
-            }
-        }
+  // Delete user modal
+  const deleteUserModal = document.getElementById("deleteUserModal");
+  const deleteCodeInput = document.getElementById("deleteCodeInput");
+  let pendingDeleteUserId = null;
+  const DELETE_CODE = "4698";
 
-        // switch steps in cash
-        function switchCashStep(step) {
-            const step1 = document.getElementById('cashStep1Panel');
-            const step2 = document.getElementById('cashStep2Panel');
-            const btn1 = document.getElementById('cashStep1Btn');
-            const btn2 = document.getElementById('cashStep2Btn');
+  // Page Navigation
+  document.getElementById("gotoRegisterPageBtn").addEventListener("click", () => {
+    loginPage.style.display = "none";
+    registerPage.style.display = "block";
+  });
+  document.getElementById("gotoLoginFromRegisterBtn").addEventListener("click", () => {
+    registerPage.style.display = "none";
+    loginPage.style.display = "block";
+  });
+  document.getElementById("switchToLoginFromReg").addEventListener("click", () => {
+    registerPage.style.display = "none";
+    loginPage.style.display = "block";
+  });
+  document.getElementById("gotoLoginBtn").addEventListener("click", () => {
+    loginPage.style.display = "block";
+    registerPage.style.display = "none";
+  });
+  document.getElementById("gotoRegisterBtn").addEventListener("click", () => {
+    registerPage.style.display = "block";
+    loginPage.style.display = "none";
+  });
 
-            if (step === 1) {
-                step1.classList.remove('hidden');
-                step2.classList.add('hidden');
-                btn1.classList.add('active');
-                btn2.classList.remove('active');
-                renderCash();  // refresh
-            } else {
-                step1.classList.add('hidden');
-                step2.classList.remove('hidden');
-                btn1.classList.remove('active');
-              btn2.classList.add('active');
-                // optional focus
-                document.getElementById('newBankName')?.focus();
-            }
-        }
+  // Forgot Password
+  document.getElementById("forgotPasswordLink").addEventListener("click", () => {
+    forgotModal.style.display = "flex";
+    document.getElementById("resetEmailModal").value = "";
+  });
+  document.getElementById("cancelForgotBtn").addEventListener("click", () => {
+    forgotModal.style.display = "none";
+  });
+  document.getElementById("sendResetModalBtn").addEventListener("click", async () => {
+    const email = document.getElementById("resetEmailModal").value.trim();
+    if (!email) return showToast("Enter your email", true);
+    showLoading();
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showToast("✅ Reset link sent to your email");
+      forgotModal.style.display = "none";
+    } catch (err) {
+      showToast(err.message, true);
+    } finally {
+      hideLoading();
+    }
+  });
 
-        // ---------- DAILY TASK (multi category) ----------
-        let currentTaskCategory = 'iti';  // 'iti', 'home', 'pro'
+  // REGISTER
+  document.getElementById("doRegisterBtn").addEventListener("click", async () => {
+    const email = document.getElementById("regEmail").value.trim();
+    const pwd = document.getElementById("regPassword").value;
+    const confirmPwd = document.getElementById("regConfirmPassword").value;
+    
+    if (!email || !pwd || !confirmPwd) return showToast("Fill all fields", true);
+    if (pwd.length < 6) return showToast("Password must be at least 6 characters", true);
+    if (pwd !== confirmPwd) return showToast("Passwords do not match", true);
+    
+    showLoading();
+    try {
+      await createUserWithEmailAndPassword(auth, email, pwd);
+      showToast("✅ Account created successfully!");
+      document.getElementById("regEmail").value = "";
+      document.getElementById("regPassword").value = "";
+      document.getElementById("regConfirmPassword").value = "";
+      registerPage.style.display = "none";
+      loginPage.style.display = "block";
+    } catch (err) {
+      let msg = err.message;
+      if (msg.includes("email-already-in-use")) msg = "Email already registered";
+      showToast(msg, true);
+    } finally {
+      hideLoading();
+    }
+  });
 
-        function openTaskCategory(cat) {
-            currentTaskCategory = cat;
-            const catTitle = document.getElementById('currentCategoryTitle');
-            if (catTitle) {
-                let displayName = cat === 'iti' ? 'ITI' : (cat === 'home' ? 'HOME' : 'PRO DEV');
-                catTitle.innerText = displayName + ' Tasks';
-            }
-            // update hidden label for step2
-            const spanCat = document.getElementById('taskCategoryLabel');
-            if (spanCat) spanCat.innerText = cat.toUpperCase();
+  // LOGIN
+  document.getElementById("doLoginBtn").addEventListener("click", async () => {
+    const email = document.getElementById("loginEmail").value.trim();
+    const pwd = document.getElementById("loginPassword").value;
+    if (!email || !pwd) return showToast("Enter email and password", true);
+    showLoading();
+    try {
+      await signInWithEmailAndPassword(auth, email, pwd);
+      showToast("Welcome to ChenTo Pro Tools!");
+      document.getElementById("loginEmail").value = "";
+      document.getElementById("loginPassword").value = "";
+    } catch (err) {
+      showToast("Invalid email or password", true);
+    } finally {
+      hideLoading();
+    }
+  });
 
-            loadTasksForCurrent();
-        }
+  // LOGOUT
+  document.getElementById("logoutMainBtn").addEventListener("click", async () => {
+    showLoading();
+    await signOut(auth);
+    appSection.style.display = "none";
+    authSection.style.display = "block";
+    loginPage.style.display = "block";
+    registerPage.style.display = "none";
+    hideLoading();
+    showToast("Logged out");
+  });
 
-        function loadTasksForCurrent() {
-            let tasks = JSON.parse(localStorage.getItem(currentTaskCategory)) || [];
-            let listDiv = document.getElementById("taskList");
-            if (!listDiv) return;
-            listDiv.innerHTML = "";
-            if (tasks.length === 0) {
-                listDiv.innerHTML = `<p style="text-align:center; padding:20px; opacity:0.7;">✨ No tasks yet. Add in step2 ✨</p>`;
-                return;
-            }
-            tasks.forEach((task, idx) => {
-                listDiv.innerHTML += `
-                    <div class="bank-item">
-                        <span>${task}</span>
-                        <div>
-                            <button onclick="editTask('${currentTaskCategory}', ${idx})" style="background:#3498db; color:white; border:none; border-radius:8px; padding:8px 12px; margin-left:5px;">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button onclick="deleteTask('${currentTaskCategory}', ${idx})" style="background:#e74c3c; color:white; border:none; border-radius:8px; padding:8px 12px; margin-left:5px;">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>`;
-            });
-        }
+  // Tab switching
+  tabUsersBtn.addEventListener("click", () => {
+    tabUsersBtn.classList.add("active");
+    tabAddUserBtn.classList.remove("active");
+    usersListSection.style.display = "block";
+    addUserSection.style.display = "none";
+    loadUsersList();
+  });
+  tabAddUserBtn.addEventListener("click", () => {
+    tabAddUserBtn.classList.add("active");
+    tabUsersBtn.classList.remove("active");
+    usersListSection.style.display = "none";
+    addUserSection.style.display = "block";
+  });
 
-        function addCurrentTask() {
-            let input = document.getElementById("taskInput");
-            let task = input.value.trim();
-            if (task === "") return;
+  // ADD USER
+  async function addNewUser(name) {
+    if (!name.trim()) return showToast("Please enter user name", true);
+    const userId = auth.currentUser?.uid;
+    if (!userId) return;
+    showLoading();
+    try {
+      const usersRef = ref(db, `users/${userId}/customers`);
+      const newRef = push(usersRef);
+      await update(newRef, { name: name.trim(), balance: 0, createdAt: Date.now(), transactions: [] });
+      showToast(`✅ User "${name}" added`);
+      document.getElementById("newUserName").value = "";
+      if (usersListSection.style.display !== "none") loadUsersList();
+    } catch (err) {
+      showToast("Failed to add user", true);
+    } finally {
+      hideLoading();
+    }
+  }
 
-            let tasks = JSON.parse(localStorage.getItem(currentTaskCategory)) || [];
-            tasks.push(task);
-            localStorage.setItem(currentTaskCategory, JSON.stringify(tasks));
-            input.value = "";
+  document.getElementById("confirmAddUserBtn").addEventListener("click", async () => {
+    const name = document.getElementById("newUserName").value;
+    await addNewUser(name);
+  });
 
-            // refresh step1 list
-            loadTasksForCurrent();
-            // switch to step1 automatically
-            switchTaskStep(1);
-        }
+  // DELETE USER
+  function promptDeleteUser(userId) {
+    pendingDeleteUserId = userId;
+    deleteCodeInput.value = "";
+    deleteUserModal.style.display = "flex";
+  }
 
-        function editTask(cat, index) {
-            let tasks = JSON.parse(localStorage.getItem(cat));
-            let newVal = prompt("Edit task", tasks[index]);
-            if (newVal && newVal.trim() !== "") {
-                tasks[index] = newVal.trim();
-                localStorage.setItem(cat, JSON.stringify(tasks));
-                if (currentTaskCategory === cat) loadTasksForCurrent();
-            }
-        }
+  document.getElementById("confirmDeleteUserBtn").addEventListener("click", async () => {
+    if (deleteCodeInput.value.trim() !== DELETE_CODE) {
+      showToast("❌ Wrong code! User not deleted.", true);
+      deleteUserModal.style.display = "none";
+      return;
+    }
+    const uid = auth.currentUser?.uid;
+    if (uid && pendingDeleteUserId) {
+      showLoading();
+      try {
+        await remove(ref(db, `users/${uid}/customers/${pendingDeleteUserId}`));
+        showToast("✅ User deleted");
+        loadUsersList();
+      } catch (err) {
+        showToast("Delete failed", true);
+      } finally {
+        hideLoading();
+      }
+    }
+    deleteUserModal.style.display = "none";
+    pendingDeleteUserId = null;
+  });
+  document.getElementById("cancelDeleteUserBtn").addEventListener("click", () => {
+    deleteUserModal.style.display = "none";
+    pendingDeleteUserId = null;
+  });
 
-        function deleteTask(cat, index) {
-            if (!confirm("Delete this task?")) return;
-            let tasks = JSON.parse(localStorage.getItem(cat));
-            tasks.splice(index, 1);
-            localStorage.setItem(cat, JSON.stringify(tasks));
-            if (currentTaskCategory === cat) loadTasksForCurrent();
-        }
+  // TRANSACTIONS
+  async function updateTransaction(userId, transactionId, newAmount, newPurpose, newType) {
+    const uid = auth.currentUser?.uid;
+    const customerRef = ref(db, `users/${uid}/customers/${userId}`);
+    const snapshot = await get(customerRef);
+    if (!snapshot.exists()) return false;
+    const customer = snapshot.val();
+    let transactions = [...(customer.transactions || [])];
+    const oldIndex = transactions.findIndex(t => t.id == transactionId);
+    if (oldIndex === -1) return false;
+    const oldTx = transactions[oldIndex];
+    
+    let newBalance = customer.balance;
+    if (oldTx.type === "credit") newBalance -= oldTx.amount;
+    else newBalance += oldTx.amount;
+    
+    if (newType === "credit") newBalance += newAmount;
+    else newBalance -= newAmount;
+    
+    const now = new Date();
+    transactions[oldIndex] = {
+      ...oldTx,
+      amount: newAmount,
+      purpose: newPurpose,
+      type: newType,
+      date: now.toLocaleDateString(),
+      time: now.toLocaleTimeString(),
+      timestamp: Date.now()
+    };
+    
+    await update(customerRef, { balance: newBalance, transactions: transactions });
+    return true;
+  }
 
-        // switch steps inside task
-        function switchTaskStep(step) {
-            const step1panel = document.getElementById('taskStep1Panel');
-            const step2panel = document.getElementById('taskStep2Panel');
-            const btn1 = document.getElementById('taskStep1Btn');
-            const btn2 = document.getElementById('taskStep2Btn');
+  async function deleteTransaction(userId, transactionId) {
+    const uid = auth.currentUser?.uid;
+    const customerRef = ref(db, `users/${uid}/customers/${userId}`);
+    const snapshot = await get(customerRef);
+    if (!snapshot.exists()) return false;
+    const customer = snapshot.val();
+    let transactions = [...(customer.transactions || [])];
+    const txIndex = transactions.findIndex(t => t.id == transactionId);
+    if (txIndex === -1) return false;
+    const tx = transactions[txIndex];
+    let newBalance = customer.balance;
+    if (tx.type === "credit") newBalance -= tx.amount;
+    else newBalance += tx.amount;
+    transactions.splice(txIndex, 1);
+    await update(customerRef, { balance: newBalance, transactions: transactions });
+    return true;
+  }
 
-            if (step === 1) {
-                step1panel.classList.remove('hidden');
-                step2panel.classList.add('hidden');
-                btn1.classList.add('active');
-                btn2.classList.remove('active');
-                loadTasksForCurrent();  // refresh list
-            } else {
-                step1panel.classList.add('hidden');
-                step2panel.classList.remove('hidden');
-                btn1.classList.remove('active');
-                btn2.classList.add('active');
-                document.getElementById('taskInput')?.focus();
-                // update category label inside step2
-                document.getElementById('taskCategoryLabel').innerText = currentTaskCategory.toUpperCase();
-            }
-        }
+  async function addTransaction(userId, amount, type, purpose) {
+    if (amount <= 0) return { success: false, msg: "Amount must be positive" };
+    if (!purpose.trim()) return { success: false, msg: "Please enter purpose" };
+    const uid = auth.currentUser?.uid;
+    const customerRef = ref(db, `users/${uid}/customers/${userId}`);
+    const snapshot = await get(customerRef);
+    if (!snapshot.exists()) return { success: false, msg: "User not found" };
+    const customer = snapshot.val();
+    let newBalance = customer.balance;
+    const now = new Date();
+    const transaction = {
+      amount: amount,
+      type: type,
+      timestamp: Date.now(),
+      date: now.toLocaleDateString(),
+      time: now.toLocaleTimeString(),
+      purpose: purpose.trim(),
+      id: Date.now() + Math.random()
+    };
+    if (type === "credit") newBalance += amount;
+    else newBalance -= amount;
+    const transactions = [...(customer.transactions || []), transaction];
+    await update(customerRef, { balance: newBalance, transactions: transactions });
+    return { success: true, msg: `${type === "credit" ? "Credited" : "Debited"} ₹${amount}`, newBalance };
+  }
 
-        // initialization for task (so that step1 is active)
-        function openTaskCategoryAndStep1(cat) {
-            openTaskCategory(cat);
-            switchTaskStep(1);
-        }
+  function renderHistoryWithActions(transactions, userId) {
+    if (!transactions || transactions.length === 0) {
+      return `<div class="empty-state">📭 No transactions yet</div>`;
+    }
+    let running = 0;
+    const sorted = [...transactions].sort((a,b) => a.timestamp - b.timestamp);
+    return sorted.map(tx => {
+      if (tx.type === "credit") running += tx.amount;
+      else running -= tx.amount;
+      const amountClass = tx.type === "credit" ? "credit-amount" : "debit-amount";
+      const sign = tx.type === "credit" ? "+" : "-";
+      return `
+        <div class="history-item">
+          <div class="history-date">📅 ${tx.date} | ⏰ ${tx.time}</div>
+          <div class="history-detail">
+            <div class="history-purpose">📝 ${escapeHtml(tx.purpose)}</div>
+            <div class="history-amount ${amountClass}">${sign} ₹${tx.amount}</div>
+          </div>
+          <div class="running-balance">💰 Balance after: ₹${running}</div>
+          <div class="txn-actions">
+            <button class="edit-txn" data-id="${tx.id}" data-user="${userId}" data-amount="${tx.amount}" data-purpose="${escapeHtml(tx.purpose)}" data-type="${tx.type}">✏️ Edit</button>
+            <button class="delete-txn" data-id="${tx.id}" data-user="${userId}">🗑️ Delete</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
 
-        // cash render on start
-        renderCash();
+  function loadUsersList() {
+    const user = auth.currentUser;
+    if (!user) return;
+    const customersRef = ref(db, `users/${user.uid}/customers`);
+    onValue(customersRef, (snapshot) => {
+      if (!snapshot.exists()) {
+        usersContainer.innerHTML = `<div class="empty-state">👋 No users yet. Add user.</div>`;
+        return;
+      }
+      let users = [];
+      snapshot.forEach(child => { users.push({ id: child.key, ...child.val() }); });
+      users.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+      
+      let html = "";
+      users.forEach(userData => {
+        const balance = userData.balance || 0;
+        let balanceClass = balance > 0 ? "positive" : (balance < 0 ? "negative" : "neutral");
+        html += `
+          <div class="user-card">
+            <div class="user-header" data-userid="${userData.id}">
+              <span class="user-name">👤 ${escapeHtml(userData.name)}</span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="user-balance ${balanceClass}">₹${balance}</span>
+                <span class="delete-user-icon" data-deleteid="${userData.id}">🗑️</span>
+              </div>
+            </div>
+            <div class="txn-panel" id="panel-${userData.id}">
+              <div class="form-group">
+                <label class="form-label">💰 Amount (₹)</label>
+                <input type="number" id="amount-${userData.id}" class="small-input" placeholder="Enter amount" step="1">
+              </div>
+              <div class="form-group">
+                <label class="form-label">📝 Purpose / Reason</label>
+                <input type="text" id="purpose-${userData.id}" class="purpose-input" placeholder="e.g., Loan, Rent, Salary">
+              </div>
+              <div class="flex-row">
+                <button class="btn-success credit-txn" data-id="${userData.id}">➕ Credit</button>
+                <button class="btn-danger debit-txn" data-id="${userData.id}">➖ Debit</button>
+              </div>
+              <div id="result-${userData.id}" class="result-message"></div>
+              <div style="margin-top: 16px; font-weight: 600;">📜 Transactions (Click ✏️ to edit, 🗑️ to delete)</div>
+              <div class="history-list" id="history-${userData.id}">
+                ${renderHistoryWithActions(userData.transactions || [], userData.id)}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      usersContainer.innerHTML = html;
 
-        // touch / active effect
-        document.addEventListener('DOMContentLoaded', function() {
-            // set default steps active
-            document.getElementById('cashStep1Btn')?.classList.add('active');
-            document.getElementById('taskStep1Btn')?.classList.add('active');
-            // ensure task category default
-            currentTaskCategory = 'iti';
-            if (!localStorage.getItem('iti')) localStorage.setItem('iti', JSON.stringify([]));
-            if (!localStorage.getItem('home')) localStorage.setItem('home', JSON.stringify([]));
-            if (!localStorage.getItem('pro')) localStorage.setItem('pro', JSON.stringify([]));
+      // Event listeners (same as before)
+      document.querySelectorAll('.user-header').forEach(header => {
+        header.addEventListener('click', (e) => {
+          if (e.target.classList?.contains('delete-user-icon')) return;
+          const uid = header.getAttribute('data-userid');
+          const panel = document.getElementById(`panel-${uid}`);
+          if (panel) {
+            document.querySelectorAll('.txn-panel').forEach(p => p.classList.remove('open'));
+            panel.classList.toggle('open');
+          }
         });
-    </script>
+      });
+
+      document.querySelectorAll('.delete-user-icon').forEach(icon => {
+        icon.addEventListener('click', (e) => {
+          e.stopPropagation();
+          promptDeleteUser(icon.getAttribute('data-deleteid'));
+        });
+      });
+
+      document.querySelectorAll('.credit-txn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const uid = btn.getAttribute('data-id');
+          const amount = parseFloat(document.getElementById(`amount-${uid}`).value);
+          const purpose = document.getElementById(`purpose-${uid}`).value.trim();
+          const resultDiv = document.getElementById(`result-${uid}`);
+          showLoading();
+          const res = await addTransaction(uid, amount, "credit", purpose);
+          hideLoading();
+          if (res.success) {
+            resultDiv.innerHTML = `✅ ${res.msg}. New Balance: ₹${res.newBalance}`;
+            resultDiv.style.background = "#dcfce7";
+            document.getElementById(`amount-${uid}`).value = "";
+            document.getElementById(`purpose-${uid}`).value = "";
+            loadUsersList();
+          } else {
+            resultDiv.innerHTML = `❌ ${res.msg}`;
+            resultDiv.style.background = "#fee2e2";
+          }
+          resultDiv.style.display = "block";
+          setTimeout(() => resultDiv.style.display = "none", 2500);
+        });
+      });
+
+      document.querySelectorAll('.debit-txn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const uid = btn.getAttribute('data-id');
+          const amount = parseFloat(document.getElementById(`amount-${uid}`).value);
+          const purpose = document.getElementById(`purpose-${uid}`).value.trim();
+          const resultDiv = document.getElementById(`result-${uid}`);
+          showLoading();
+          const res = await addTransaction(uid, amount, "debit", purpose);
+          hideLoading();
+          if (res.success) {
+            resultDiv.innerHTML = `✅ ${res.msg}. New Balance: ₹${res.newBalance}`;
+            resultDiv.style.background = "#dcfce7";
+            document.getElementById(`amount-${uid}`).value = "";
+            document.getElementById(`purpose-${uid}`).value = "";
+            loadUsersList();
+          } else {
+            resultDiv.innerHTML = `❌ ${res.msg}`;
+            resultDiv.style.background = "#fee2e2";
+          }
+          resultDiv.style.display = "block";
+          setTimeout(() => resultDiv.style.display = "none", 2500);
+        });
+      });
+
+      document.querySelectorAll('.edit-txn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          editTarget.userId = btn.getAttribute('data-user');
+          editTarget.transactionId = btn.getAttribute('data-id');
+          editAmount.value = btn.getAttribute('data-amount');
+          editPurpose.value = btn.getAttribute('data-purpose');
+          editType.value = btn.getAttribute('data-type');
+          editModal.style.display = "flex";
+        });
+      });
+
+      document.querySelectorAll('.delete-txn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const txnId = btn.getAttribute('data-id');
+          const userId = btn.getAttribute('data-user');
+          if (confirm("Delete this transaction? This will update the balance.")) {
+            showLoading();
+            await deleteTransaction(userId, txnId);
+            hideLoading();
+            showToast("🗑️ Transaction deleted");
+            loadUsersList();
+          }
+        });
+      });
+    });
+  }
+
+  document.getElementById("saveEditBtn").addEventListener("click", async () => {
+    const newAmount = parseFloat(editAmount.value);
+    const newPurpose = editPurpose.value.trim();
+    const newType = editType.value;
+    if (isNaN(newAmount) || newAmount <= 0) return showToast("Invalid amount", true);
+    if (!newPurpose) return showToast("Purpose required", true);
+    showLoading();
+    await updateTransaction(editTarget.userId, editTarget.transactionId, newAmount, newPurpose, newType);
+    hideLoading();
+    showToast("✅ Transaction updated");
+    editModal.style.display = "none";
+    loadUsersList();
+  });
+  document.getElementById("cancelEditBtn").addEventListener("click", () => {
+    editModal.style.display = "none";
+  });
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      authSection.style.display = "none";
+      appSection.style.display = "block";
+      usersListSection.style.display = "block";
+      addUserSection.style.display = "none";
+      tabUsersBtn.classList.add("active");
+      tabAddUserBtn.classList.remove("active");
+      loadUsersList();
+    } else {
+      appSection.style.display = "none";
+      authSection.style.display = "block";
+      loginPage.style.display = "block";
+      registerPage.style.display = "none";
+    }
+  });
+</script>
 </body>
 </html>
